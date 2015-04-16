@@ -97,6 +97,7 @@
  *
  */
 /***************************************************************
+Add new BPredPredicate for Predicate Prediction in bpred_class ------ Nang Le & Brandon McMillian
 ****************************************************************/ 
 /* branch predictor types */
 enum bpred_class {
@@ -105,6 +106,7 @@ enum bpred_class {
   BPred2bit,			/* 2-bit saturating cntr pred (dir mapped) */
   BPredTaken,			/* static predict taken */
   BPredNotTaken,		/* static predict not taken */
+  BPredPredicate,            /***/
   BPred_NUM
 };
 
@@ -136,6 +138,7 @@ struct bpred_dir_t {
     } two;
 	struct {
       int predsize;  /* number of entries in predicate table */
+      int predshift_width; /* table BHR size */
 	  bool predB;	/*boolean value, define whether or not branch is both perform */
     } predicate;
   } config;

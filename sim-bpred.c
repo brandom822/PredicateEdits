@@ -1,13 +1,13 @@
 /* sim-bpred.c - sample branch predictor simulator implementation */
 
-<<<<<<< HEAD
+
 /* SimpleScalar(TM) Tool Suite ---
 =======
-/* SimpleScalar(TM) Tool Suite ---- Nang Lam Le & Brandon McMillian
->>>>>>> origin/master
+/* SimpleScalar(TM) Tool Suite ----
+
  * Copyright (C) 1994-2003 by Todd M. Austin, Ph.D. and SimpleScalar, LLC.
  * All Rights Reserved.
- * Brandon McMillan was here >:D
+ *
  * THIS IS A LEGAL DOCUMENT, BY USING SIMPLESCALAR,
  * YOU ARE AGREEING TO THESE TERMS AND CONDITIONS.
  *

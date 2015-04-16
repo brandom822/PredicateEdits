@@ -96,7 +96,8 @@
  *	BPredNotTaken:  static predict branch not taken
  *
  */
-
+/***************************************************************
+****************************************************************/ 
 /* branch predictor types */
 enum bpred_class {
   BPredComb,                    /* combined predictor (McFarling) */
@@ -104,7 +105,6 @@ enum bpred_class {
   BPred2bit,			/* 2-bit saturating cntr pred (dir mapped) */
   BPredTaken,			/* static predict taken */
   BPredNotTaken,		/* static predict not taken */
-  BPredPred,            /** EDIT: predicate prediction **/
   BPred_NUM
 };
 
@@ -112,16 +112,12 @@ enum bpred_class {
 struct bpred_btb_ent_t {
   md_addr_t addr;		/* address of branch being tracked */
   enum md_opcode op;		/* opcode of branch corresp. to addr */
-  /**
-  EDIT:
-  [insert]--> A variable to track the md_operands of this branch.
-    I've had some trouble figuring out how to store the md_operands of this branch.
-
-  **/
   md_addr_t target;		/* last destination of branch when taken */
   struct bpred_btb_ent_t *prev, *next; /* lru chaining pointers */
 };
-
+/***************************************************************
+Created the new structure for predication prediction
+****************************************************************/
 /* direction predictor def */
 struct bpred_dir_t {
   enum bpred_class class;	/* type of predictor */
@@ -138,11 +134,10 @@ struct bpred_dir_t {
       int *shiftregs;		/* level-1 history table */
       unsigned char *l2table;	/* level-2 prediction state table */
     } two;
-	/* should we add new struct for predicate predictor table --- Nang */
-	/** struct {
-      int predsize; 
-      int shift_width;
-    } predicate; */
+	struct {
+      int predsize;  /* number of entries in predicate table */
+	  bool predB;	/*boolean value, define whether or not branch is both perform */
+    } predicate;
   } config;
 };
 
@@ -152,10 +147,6 @@ struct bpred_t {
   struct {
     struct bpred_dir_t *bimod;	  /* first direction predictor */
     struct bpred_dir_t *twolev;	  /* second direction predictor */
-    /**
-    EDIT:
-    struct bpred_dir_t *predicate;  // predicate predictor
-    **/
     struct bpred_dir_t *meta;	  /* meta predictor */
   } dirpred;
 
@@ -222,11 +213,6 @@ bpred_create(enum bpred_class class,	/* type of predictor to create */
 struct bpred_dir_t *		/* branch direction predictor instance */
 bpred_dir_create (
   enum bpred_class class,	/* type of predictor to create */
-  /**
-  EDIT:
-    A new variable may be necessary for instantiating a Predicate Predictor.
-	Maybe yes, cause we did add new value table size for function above. This function is the direction to that prediction -- Nang */  
-  **/
   unsigned int l1size,		/* level-1 table size */
   unsigned int l2size,		/* level-2 table size (if relevant) */
   unsigned int shift_width,	/* history register width */

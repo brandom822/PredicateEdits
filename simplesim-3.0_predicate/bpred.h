@@ -118,7 +118,7 @@ struct bpred_btb_ent_t {
   struct bpred_btb_ent_t *prev, *next; /* lru chaining pointers */
 };
 /***************************************************************
-Created the new structure for predication prediction
+Created the new structure for predication prediction   ---------------- Nang Le & Brandon McMillian -- Check again parameters
 ****************************************************************/
 /* direction predictor def */
 struct bpred_dir_t {
@@ -139,7 +139,9 @@ struct bpred_dir_t {
 	struct {
       int predsize;  /* number of entries in predicate table */
       int predshift_width; /* table BHR size */
+	  int local_width;	/*local history table */
 	  bool predB;	/*boolean value, define whether or not branch is both perform */
+	  int index;				/* the index value = (baddr>>2) % (size predsize)*/
     } predicate;
   } config;
 };
@@ -251,9 +253,6 @@ bpred_lookup(struct bpred_t *pred,	/* branch predictor instance */
 	     md_addr_t baddr,		/* branch address */
 	     md_addr_t btarget,		/* branch target if taken */
 	     enum md_opcode op,		/* opcode of instruction */
-	     /**EDIT:
-	     enum md_operand operand,    // operand(s) of the instruction**/ 
-		 /* I missed this parts, so I havenot got any idea about it, figure out tmr -- Nang*/
 	     int is_call,		/* non-zero if inst is fn call */
 	     int is_return,		/* non-zero if inst is fn return */
 	     struct bpred_update_t *dir_update_ptr, /* pred state pointer */
@@ -285,7 +284,7 @@ bpred_update(struct bpred_t *pred,	/* branch predictor instance */
 	     int taken,			/* non-zero if branch was taken */
 	     int pred_taken,		/* non-zero if branch was pred taken */
 	     int correct,		/* was earlier prediction correct? */
-	     enum md_opcode op,		/* opcode of instruction */   /* should we add new md_operand op, in this function -- Nang */
+	     enum md_opcode op,		/* opcode of instruction */   
 	     struct bpred_update_t *dir_update_ptr); /* pred state pointer */
 
 

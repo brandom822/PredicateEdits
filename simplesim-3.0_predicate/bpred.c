@@ -69,7 +69,6 @@ bpred_create(enum bpred_class class,	/* type of predictor to create */
 	     unsigned int l1size,	/* 2lev l1 table size */
 	     unsigned int l2size,	/* 2lev l2 table size */
 	     unsigned int meta_size,	/* meta table size */
-		 /* add new value table size for predicate predictor--- unsigned int predicate_size, ----Nang */
 	     unsigned int shift_width,	/* history register width */
 	     unsigned int xor,  	/* history xor address flag */
 	     unsigned int btb_sets,	/* number of sets in BTB */
@@ -105,18 +104,23 @@ bpred_create(enum bpred_class class,	/* type of predictor to create */
       bpred_dir_create(class, l1size, l2size, shift_width, xor);
 
     break;
+/***************************************************************
+created a new case named BPredPredication getting values from bpred_dir_create assigned in sim-outorder.c
+l1size = 256
+l2size = ???
+shift_width = size of global BHR = 30
+****************************************************************/
+	case BPredPredicate:
+    pred->dirpred.bimod =
+      bpred_dir_create(class, l1size, l2size, shift_width, 0);
+
+    break;
 
   case BPred2bit:
     pred->dirpred.bimod =
       bpred_dir_create(class, bimod_size, 0, 0, 0);
 
-/**
-EDIT:
-[create]--> the BPred class BPredPred;
-[insert]--> case BPredPred:
-[update]--> bpred_dir_create() to instantiate according to BPredPred class
 
-**/
 
   case BPredTaken:
   case BPredNotTaken:
@@ -127,16 +131,14 @@ EDIT:
     panic("bogus predictor class");
   }
 
-  /* allocate ret-addr stack */
-  //EDIT: ADD a case for bpredPredicate
   switch (class) {
   case BPredComb:
   case BPred2Level:
   case BPred2bit:
-  /**
-  EDIT:
-  [insert]--> case BPredPred:
-  **/
+/***************************************************************
+        allocation of BTB and RAS for perdication             --------------Nang Le & Brandon McMillian
+****************************************************************/
+  case BPredPredicate:
     {
       int i;
 
@@ -263,6 +265,42 @@ bpred_dir_create (
 	pred_dir->config.bimod.table[cnt] = flipflop;
 	flipflop = 3 - flipflop;
       }
+
+    break;
+/***************************************************************
+Checking for false parameter values for predication  -----------Nang Le & Brandon McMillian
+****************************************************************/
+  case BPredPredicate:
+	  if (!l1size)
+	  fatal("number of perceptrons, `%d', must be non-zero and positive",
+	    l1size);
+	if (!l2size)
+	  fatal("number of perceptrons, `%d', must be non-zero and positive",
+	    l2size);
+	if (!shift_width)
+	  fatal("shift register width, `%d', must be non-zero and positive",
+	    shift_width);
+	pred_dir->config.predicate.predsize = l1size;
+	pred_dir->config.perceptron.weight_bits = l2size;
+	pred_dir->config.predicate.predshift_width = shift_width;
+	
+
+/***************************************************************
+Initializing hist table to all 0 and global BHR to all 1 --- Fix it
+****************************************************************/
+	int i,j;
+
+      for (i = 0; i < pred_dir->config.predicate.index; i++)
+	{
+	  for (j=0; j < shift_width; j++)
+	  pred_dir->config.predicate.table = 0;	 	
+	}
+    
+        
+     for (cnt = 0; cnt < shift_width; cnt++){
+        pred_dir->config.predicate.table[cnt] = 1;
+     }
+
 
     break;
 
@@ -500,7 +538,7 @@ bpred_after_priming(struct bpred_t *bpred)
 
 #define BIMOD_HASH(PRED, ADDR)						\
   ((((ADDR) >> 19) ^ ((ADDR) >> MD_BR_SHIFT)) & ((PRED)->config.bimod.size-1))
-    /* was: ((baddr >> 16) ^ baddr) & (pred->dirpred.bimod.size-1) */ /*---------Did u change this part - Nang */
+    /* was: ((baddr >> 16) ^ baddr) & (pred->dirpred.bimod.size-1) */ 
 
 /* predicts a branch direction */
 char *						/* pointer to counter */
@@ -562,16 +600,7 @@ bpred_dir_lookup(struct bpred_dir_t *pred_dir,	/* branch dir predictor inst */
   return (char *)p;
 }
 
-/* EDIT: this function must look through our predicate prediction
-    1. run original benchmarks
-    2. determine link between 2 operands and the branch-result
-    3. add new operand to this; the function should use our thing
-    4. find this "enum md_opcode op" and determine the structure which stores the op-code. Modify it to hold a history (md_opcode op array[5])
-    There's an md_opcode. There must an md_operand within the same structure.
-    Add a new historicalTable piece to it.
-
-
-   probe a predictor for a next fetch address. The predictor is probed with:
+/*  probe a predictor for a next fetch address. The predictor is probed with:
         branch address BADDR,
         the branch target is BTARGET (used for static predictors), and
         OP is the instruction opcode (used to simulate predecode bits;
@@ -584,10 +613,6 @@ bpred_lookup(struct bpred_t *pred,	/* branch predictor instance */
 	     md_addr_t baddr,		/* branch address */
 	     md_addr_t btarget,		/* branch target if taken */
 	     enum md_opcode op,		/* opcode of instruction */
-	      /**EDIT:
-	     enum md_operand operand,    // operand(s) of the instruction
-             It's necessary to use this new field, though I'm not sure how.
-            **/
 	     int is_call,		/* non-zero if inst is fn call */
 	     int is_return,		/* non-zero if inst is fn return */
 	     struct bpred_update_t *dir_update_ptr, /* pred state pointer */
@@ -790,14 +815,6 @@ bpred_update(struct bpred_t *pred,	/* branch predictor instance */
 	     int pred_taken,		/* non-zero if branch was pred taken */
 	     int correct,		/* was earlier addr prediction ok? */
 	     enum md_opcode op,		/* opcode of instruction */
-	     /**
-	     EDIT:
-	     enum md_operand operand,    // operand(s) of the instruction
-            Still unsure how to use the operand field here. "Note if
-            bpred_update is done speculatively, branch-prediction may
-            get polluted." This quote leads me to believe that we need not edit this function at all.
-
-	     **/
 	     struct bpred_update_t *dir_update_ptr)/* pred state pointer */
 {
   struct bpred_btb_ent_t *pbtb = NULL;

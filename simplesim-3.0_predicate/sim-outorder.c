@@ -118,6 +118,16 @@ static int bimod_nelt = 1;
 static int bimod_config[1] =
   { /* bimod tbl size */2048 };
 
+/***************************************************************
+Predicate predictor config --------------- Nang Le & Brandon McMillian --- Check again parameters
+****************************************************************/
+
+/* Predicate predictor config (<l1size> <ll2size> <shift_width> <predB>) */
+static int predicate_nelt = 4;
+static int predicate_config[4] =
+  { /* predicate index size */256, /*No. of BHR bits */10, /* hist */30, /*predB*/ TRUE};
+
+
 /* 2-level predictor config (<l1size> <l2size> <hist_size> <xor>) */
 static int twolev_nelt = 4;
 static int twolev_config[4] =
@@ -930,6 +940,21 @@ sim_check_options(struct opt_odb_t *odb,        /* options database */
 			  /* btb assoc */btb_config[1],
 			  /* ret-addr stack size */ras_size);
     }
+ /***************************************************************
+Predicate parameter passing and function call ------------ Nang Le & Brandon McMillian --- check again
+****************************************************************/
+  else if (!mystricmp(pred_type, "predicate"))
+    { pred = bpred_create(BPredPredicate,
+			  /* bimod table size */ 0,
+			  /* 2lev l1 size */predicate_config[0],
+			  /* 2lev l2 size */predicate_config[1],
+			  /* meta table size */0,
+			  /* history reg size */predicate_config[2],
+			  /* history xor address */0,
+			  /* btb sets */btb_config[0],
+			  /* btb assoc */btb_config[1],
+			  /* ret-addr stack size */ras_size);
+  }
   else if (!mystricmp(pred_type, "2lev"))
     {
       /* 2-level adaptive predictor, bpred_create() checks args */

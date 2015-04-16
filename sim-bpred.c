@@ -1,10 +1,6 @@
 /* sim-bpred.c - sample branch predictor simulator implementation */
 
-<<<<<<< HEAD
-/* SimpleScalar(TM) Tool Suite ---
-=======
-/* SimpleScalar(TM) Tool Suite ---- Nang Lam Le & Brandon McMillian
->>>>>>> origin/master
+/* SimpleScalar(TM) Tool Suite 
  * Copyright (C) 1994-2003 by Todd M. Austin, Ph.D. and SimpleScalar, LLC.
  * All Rights Reserved.
  * Brandon McMillan was here >:D
@@ -477,7 +473,7 @@ sim_main(void)
 #endif /* TARGET_ALPHA */
 
       /* get the next instruction to execute */
-      MD_FETCH_INST(inst, mem, regs.regs_PC);
+      MD_FETCH_INST(inst, mem, regs.regs_PC);                            /*check this out - NangLe*/
 
       /* keep an instruction count */
       sim_num_insn++;

@@ -96,6 +96,15 @@ static int twolev_nelt = 4;
 static int twolev_config[4] =
   { /* l1size */1, /* l2size */1024, /* hist */8, /* xor */FALSE};
 
+/***************************************************************
+Predicate predictor config --------------- Nang Le & Brandon McMillian
+****************************************************************/
+
+/* Predicate predictor config (<l1size> <ll2size> <shift_width>) */
+static int predicate_nelt = 3;
+static int predicate_config[3] =
+  { /* predicate index size */4, /*No. of BHR bits */16, /* hist */30};
+
 /* combining predictor config (<meta_table_size> */
 static int comb_nelt = 1;
 static int comb_config[1] =
@@ -167,6 +176,16 @@ sim_reg_options(struct opt_odb_t *odb)
 		   /* default */twolev_config,
                    /* print */TRUE, /* format */NULL, /* !accrue */FALSE);
 
+  /***************************************************************
+	Did the same here                                       ******* Nang Le & Brandon
+****************************************************************/
+  opt_reg_int_list(odb, "-bpred:predicate",
+		   "predicate predictor config "
+		   "(<l1size> <l2size> <hist_size> <predB>)",
+		   predicate_config, predicate_nelt, &predicate_nelt,
+		   /* default */predicate_config,
+		   /* print */TRUE, /* format */NULL, /* !accrue */FALSE);
+
   opt_reg_int_list(odb, "-bpred:comb",
 		   "combining predictor config (<meta_table_size>)",
 		   comb_config, comb_nelt, &comb_nelt,
@@ -237,6 +256,21 @@ sim_check_options(struct opt_odb_t *odb, int argc, char **argv)
 			  /* btb assoc */btb_config[1],
 			  /* ret-addr stack size */ras_size);
     }
+/***************************************************************
+Predicate parameter passing and function call ------------ Nang Le & Brandon McMillian 
+****************************************************************/
+  else if (!mystricmp(pred_type, "predicate"))
+    { pred = bpred_create(BPredPredicate,
+			  /* bimod table size */ 0,
+			  /* 2lev l1 size */predicate_config[0],
+			  /* 2lev l2 size */predicate_config[1],
+			  /* meta table size */0,
+			  /* history reg size */predicate_config[2],
+			  /* history xor address */0,
+			  /* btb sets */btb_config[0],
+			  /* btb assoc */btb_config[1],
+			  /* ret-addr stack size */ras_size);
+  }
   else if (!mystricmp(pred_type, "comb"))
     {
       /* combining predictor, bpred_create() checks args */

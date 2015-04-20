@@ -106,7 +106,7 @@ enum bpred_class {
   BPred2bit,			/* 2-bit saturating cntr pred (dir mapped) */
   BPredTaken,			/* static predict taken */
   BPredNotTaken,		/* static predict not taken */
-  BPredPredicate,            /***/
+  BPredPredicate,            /*dynamic predicate value based prediction */
   BPred_NUM
 };
 
@@ -138,9 +138,13 @@ struct bpred_dir_t {
     } two;
 	struct {
       int predsize;  /* number of entries in predicate table */
-      int predshift_width; /* table BHR size */
-	  int local_width;	/*local history table */
-	  bool predB;	/*boolean value, define whether or not branch is both perform */
+	  int predbit;	/* number of bits per entry 2^4 = 16 bits*/
+      int predshift_width; /* history table BHR shift regs */
+	//  int predication; /*boolean guard compared instruction */
+	  int output;	                   	/* to store outcome of each lookup and use in update */
+	//  int *pred_shiftregs;		/* level-1 history table */
+	  signed int value_table[500][500];	/* store element of values */	
+	  unsigned char *predicate_table;		/* predicate state table*/
 	  int index;				/* the index value = (baddr>>2) % (size predsize)*/
     } predicate;
   } config;

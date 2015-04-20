@@ -119,13 +119,13 @@ static int bimod_config[1] =
   { /* bimod tbl size */2048 };
 
 /***************************************************************
-Predicate predictor config --------------- Nang Le & Brandon McMillian --- Check again parameters
+Predicate predictor config --------------- Nang Le & Brandon McMillian
 ****************************************************************/
 
-/* Predicate predictor config (<l1size> <ll2size> <shift_width> <predB>) */
-static int predicate_nelt = 4;
-static int predicate_config[4] =
-  { /* predicate index size */256, /*No. of BHR bits */10, /* hist */30, /*predB*/ TRUE};
+/* Predicate predictor config (<l1size> <ll2size> <shift_width>) */
+static int predicate_nelt = 3;
+static int predicate_config[3] =
+  { /* predicate index size */4, /*No. of BHR bits */16, /* hist */30};
 
 
 /* 2-level predictor config (<l1size> <l2size> <hist_size> <xor>) */
@@ -670,6 +670,16 @@ sim_reg_options(struct opt_odb_t *odb)
 		   /* default */bimod_config,
 		   /* print */TRUE, /* format */NULL, /* !accrue */FALSE);
 
+/***************************************************************
+	Did the same here                                       ******* Nang Le & Brandon
+****************************************************************/
+  opt_reg_int_list(odb, "-bpred:predicate",
+		   "predicate predictor config "
+		   "(<l1size> <l2size> <hist_size> <predB>)",
+		   predicate_config, predicate_nelt, &predicate_nelt,
+		   /* default */predicate_config,
+		   /* print */TRUE, /* format */NULL, /* !accrue */FALSE);
+
   opt_reg_int_list(odb, "-bpred:2lev",
                    "2-level predictor config "
 		   "(<l1size> <l2size> <hist_size> <xor>)",
@@ -941,7 +951,7 @@ sim_check_options(struct opt_odb_t *odb,        /* options database */
 			  /* ret-addr stack size */ras_size);
     }
  /***************************************************************
-Predicate parameter passing and function call ------------ Nang Le & Brandon McMillian --- check again
+Predicate parameter passing and function call ------------ Nang Le & Brandon McMillian 
 ****************************************************************/
   else if (!mystricmp(pred_type, "predicate"))
     { pred = bpred_create(BPredPredicate,

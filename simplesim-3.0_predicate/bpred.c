@@ -285,7 +285,7 @@ Checking for false parameter values for predication  -----------Nang Le & Brando
 	fatal("shift register width, `%d', must be non-zero and positive",
 	      shift_width);
       pred_dir->config.predicate.predshift_width = shift_width;
-	  pred_dir->config.predicate.predication = xor;
+	//  pred_dir->config.predicate.predication = xor;
 	  
 	//  pred_dir->config.predicate.pred_shiftregs = calloc(l1size, sizeof(int));
     //  if (!pred_dir->config.predicate.pred_shiftregs)
@@ -348,8 +348,8 @@ bpred_dir_config(
 
 
  case BPredPredicate:
-    fprintf(stream, "pred_dir: %s:  %d predicate, %d predbits, %d history\n",
-      name, pred_dir->config.predicate.predsize, pred_dir->config.predicate.predbits,
+    fprintf(stream, "pred_dir: %s:  %d predicate, %d predbit, %d history\n",
+      name, pred_dir->config.predicate.predsize, pred_dir->config.predicate.predbit,
 	  pred_dir->config.predicate.predshift_width);
     break;
 
@@ -630,11 +630,11 @@ Predication lookup						************************** Nang Le & Brandon McMillian
 ***************************************************************/
 
 	int	index, i;
-	signed int value[100], sum = 0; // calculate value
+	signed int value[100]; // calculate value
 	signed int outcome = 0;
-	int *entry;
+	
 			
-	product[0]=0;
+	value[0]=0;
 	index = (baddr >> MD_BR_SHIFT) % pred_dir->config.predicate.predsize; 
 	pred_dir->config.predicate.index = index;
 			

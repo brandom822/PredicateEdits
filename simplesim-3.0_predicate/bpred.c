@@ -112,7 +112,7 @@ shift_width = size of global BHR = 30
 ****************************************************************/
 	case BPredPredicate:
     pred->dirpred.bimod =
-      bpred_dir_create(class, l1size, l2size, shift_width, xor);
+      bpred_dir_create(class, l1size, l2size, shift_width, 0);
 
     break;
 
@@ -307,7 +307,7 @@ Initializing value hist table to all 0 and global BHR to all 1 --- Nang Le & Bra
     
         
      flipflop = 1;
-      for (cnt = 0; cnt < l2size; cnt++)
+      for (cnt = 0; cnt < shift_width; cnt++)
 	{
 	  pred_dir->config.predicate.predicate_table[cnt] = flipflop;
 	  flipflop = 3 - flipflop;
@@ -648,10 +648,10 @@ Calculating value = w[0] + E(w[i]*x[i])
 				outcome += value[i];
 			}
 			
-			/* get pointers to that perceptron and its weights */
+			/* get pointers to that predicate and its values */
 						                        
 			pred_dir->config.predicate.output = outcome;
-			p = &pred_dir->config.predicate.value_table[index][i];
+			p = &pred_dir->config.predicate.predicate_table[index];
 			
 //			int l1index, l2index;
 //

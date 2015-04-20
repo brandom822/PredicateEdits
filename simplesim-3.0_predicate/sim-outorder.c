@@ -125,7 +125,7 @@ Predicate predictor config --------------- Nang Le & Brandon McMillian
 /* Predicate predictor config (<l1size> <ll2size> <shift_width>) */
 static int predicate_nelt = 3;
 static int predicate_config[3] =
-  { /* predicate index size */4, /*No. of BHR bits */16, /* hist */30};
+  { /* predicate index size */128, /*No. of BHR bits */16, /* hist */30};
 
 
 /* 2-level predictor config (<l1size> <l2size> <hist_size> <xor>) */

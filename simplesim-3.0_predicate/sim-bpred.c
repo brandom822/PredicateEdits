@@ -100,7 +100,7 @@ Predicate predictor config --------------- Nang Le & Brandon McMillian
 /* Predicate predictor config (<l1size> <ll2size> <shift_width>) */
 static int predicate_nelt = 3;
 static int predicate_config[3] =
-  { /* predicate index size */4, /*No. of BHR bits */16, /* hist */30};
+  { /* predicate index size */512, /*No. of BHR bits */8, /* hist */30};
 
 /* combining predictor config (<meta_table_size> */
 static int comb_nelt = 1;
@@ -113,7 +113,7 @@ static int ras_size = 8;
 /* BTB predictor config (<num_sets> <associativity>) */
 static int btb_nelt = 2;
 static int btb_config[2] =
-  { /* nsets */512, /* assoc */4 };
+  { /* nsets */4096, /* assoc */4 };
 
 /* branch predictor */
 static struct bpred_t *pred;
@@ -178,7 +178,7 @@ sim_reg_options(struct opt_odb_t *odb)
 ****************************************************************/
   opt_reg_int_list(odb, "-bpred:predicate",
 		   "predicate predictor config "
-		   "(<l1size> <l2size> <hist_size> <predB>)",
+		   "(<l1size> <l2size> <hist_size>)",
 		   predicate_config, predicate_nelt, &predicate_nelt,
 		   /* default */predicate_config,
 		   /* print */TRUE, /* format */NULL, /* !accrue */FALSE);
@@ -257,7 +257,13 @@ sim_check_options(struct opt_odb_t *odb, int argc, char **argv)
 Predicate parameter passing and function call ------------ Nang Le & Brandon McMillian 
 ****************************************************************/
   else if (!mystricmp(pred_type, "predicate"))
-    { pred = bpred_create(BPredPredicate,
+    {  
+		/*if (twolev_nelt != 4)
+	fatal("bad 2-level pred config (<l1size> <l2size> <hist_size>)");
+      if (btb_nelt != 2)
+	fatal("bad btb config (<num_sets> <associativity>)");*/
+		
+	  pred = bpred_create(BPredPredicate,
 			  /* bimod table size */ 0,
 			  /* 2lev l1 size */predicate_config[0],
 			  /* 2lev l2 size */predicate_config[1],

@@ -105,9 +105,9 @@ bpred_create(enum bpred_class class,	/* type of predictor to create */
 
     break;
 /***************************************************************
-created a new case named BPredPredication getting values in sim-outorder.c
-l1size = 4K entries = 
-l2size = 16
+created a new case named BPredPredication getting values in sim-outorder.c   ***** Nang Le & Brandon McMillian
+l1size = 128 entries = 
+l2size = 8
 shift_width = size of global BHR = 30
 ****************************************************************/
 	case BPredPredicate:
@@ -139,22 +139,18 @@ shift_width = size of global BHR = 30
         allocation of BTB and RAS for perdication             --------------Nang Le & Brandon McMillian
 ****************************************************************/
   case BPredPredicate:
-    {
-      int i;
-
+	  {
+	  int i;
       /* allocate BTB */
       if (!btb_sets || (btb_sets & (btb_sets-1)) != 0)
 	fatal("number of BTB sets must be non-zero and a power of two");
       if (!btb_assoc || (btb_assoc & (btb_assoc-1)) != 0)
 	fatal("BTB associativity must be non-zero and a power of two");
-
       if (!(pred->btb.btb_data = calloc(btb_sets * btb_assoc,
 					sizeof(struct bpred_btb_ent_t))))
 	fatal("cannot allocate BTB");
-
       pred->btb.sets = btb_sets;
       pred->btb.assoc = btb_assoc;
-
       if (pred->btb.assoc > 1)
 	for (i=0; i < (pred->btb.assoc*pred->btb.sets); i++)
 	  {
@@ -166,20 +162,18 @@ shift_width = size of global BHR = 30
 	    if (i % pred->btb.assoc != pred->btb.assoc - 1)
 	      pred->btb.btb_data[i+1].prev = &pred->btb.btb_data[i];
 	  }
-
       /* allocate retstack */
       if ((retstack_size & (retstack_size-1)) != 0)
 	fatal("Return-address-stack size must be zero or a power of two");
-
       pred->retstack.size = retstack_size;
       if (retstack_size)
 	if (!(pred->retstack.stack = calloc(retstack_size,
 					    sizeof(struct bpred_btb_ent_t))))
 	  fatal("cannot allocate return-address-stack");
       pred->retstack.tos = retstack_size - 1;
-
+	  }
       break;
-    }
+
 
   case BPredTaken:
   case BPredNotTaken:
@@ -271,31 +265,32 @@ bpred_dir_create (
 Checking for false parameter values for predication  -----------Nang Le & Brandon McMillian
 ****************************************************************/
   case BPredPredicate:
-	  if (!l1size || (l1size & (l1size-1)) != 0)
-	fatal("level-1 size, `%d', must be non-zero and a power of two",
-	      l1size);
+	  if (!l1size)
+	  fatal("number of perceptrons, `%d', must be non-zero and positive",
+	    l1size);
       pred_dir->config.predicate.predsize = l1size;
 
-      if (!l2size || (l2size & (l2size-1)) != 0)
-	fatal("level-2 size, `%d', must be non-zero and a power of two",
-	      l2size);
+      if (!l2size)
+	  fatal("number of perceptrons, `%d', must be non-zero and positive",
+	    l2size);
       pred_dir->config.predicate.predbit = l2size;
 
-	if (!shift_width || shift_width > 30)
-	fatal("shift register width, `%d', must be non-zero and positive",
-	      shift_width);
+	if (!shift_width)
+	  fatal("shift register width, `%d', must be non-zero and positive",
+	    shift_width);
+
       pred_dir->config.predicate.predshift_width = shift_width;
 	//  pred_dir->config.predicate.predication = xor;
 	  
 	//  pred_dir->config.predicate.pred_shiftregs = calloc(l1size, sizeof(int));
-    //  if (!pred_dir->config.predicate.pred_shiftregs)
-	//fatal("cannot allocate shift register table");
+   /* if (!pred_dir->config.predicate.pred_shiftregs)
+	fatal("cannot allocate shift register table");*/
 
-	  pred_dir->config.predicate.predicate_table = calloc(l2size, sizeof(unsigned char));
+	 /* pred_dir->config.predicate.predicate_table = calloc(l2size, sizeof(unsigned char));
       if (!pred_dir->config.predicate.predicate_table)
-	fatal("cannot allocate second level table");
+	fatal("cannot allocate second level table");*/
 /***************************************************************
-Initializing value hist table to all 0 and global BHR to all 1 --- Nang Le & Brandon McMillian
+Initializing value hist table to all 0 and global BHR to all 0 --- Nang Le & Brandon McMillian
 ****************************************************************/
 	int i,j;
 
@@ -306,11 +301,11 @@ Initializing value hist table to all 0 and global BHR to all 1 --- Nang Le & Bra
 	}
     
         
-     flipflop = 1;
+    // flipflop = 1;
       for (cnt = 0; cnt < shift_width; cnt++)
 	{
-	  pred_dir->config.predicate.predicate_table[cnt] = flipflop;
-	  flipflop = 3 - flipflop;
+	  pred_dir->config.predicate.predicate_table[cnt] = 0;
+	//  flipflop = 3 - flipflop;
 	}
 
 
@@ -452,7 +447,7 @@ bpred_reg_stats(struct bpred_t *pred,	/* branch predictor instance */
     case BPred2bit:
       name = "bpred_bimod";
       break;
-/***************************************************************
+/*************************************************************** Nang Le & Brandon McMillian
 Priniting of stats
 ****************************************************************/
 
@@ -609,6 +604,10 @@ bpred_dir_lookup(struct bpred_dir_t *pred_dir,	/* branch dir predictor inst */
 #else
 	    l2index = l2index ^ (baddr >> MD_BR_SHIFT);
 #endif
+		/*l2index = (1) ? (((l2index ^ (baddr >> MD_BR_SHIFT))
+			& ((1 << pred_dir->config.two.shift_width) - 1))
+		       | ((baddr >> MD_BR_SHIFT)
+			  << pred_dir->config.two.shift_width)) : l2index ^ (baddr >> MD_BR_SHIFT); */
 	  }
 	else
 	  {
@@ -628,12 +627,13 @@ bpred_dir_lookup(struct bpred_dir_t *pred_dir,	/* branch dir predictor inst */
 /***************************************************************
 Predication lookup						************************** Nang Le & Brandon McMillian
 ***************************************************************/
-
-	int	index, i;
-	signed int value[100]; // calculate value
+	case BPredPredicate:
+		{
+	int	index, i, x;
+	signed int value[500]; // calculate value
 	signed int outcome = 0;
-	
-			
+	int j = 1;
+	int prediction;
 	value[0]=0;
 	index = (baddr >> MD_BR_SHIFT) % pred_dir->config.predicate.predsize; 
 	pred_dir->config.predicate.index = index;
@@ -644,45 +644,26 @@ Calculating value = w[0] + E(w[i]*x[i])
 ****************************************************************/	
 			for (i=0; i < pred_dir->config.predicate.predshift_width; i++)
 			{
-				value[i] = (pred_dir->config.predicate.value_table[index][i]) * (pred_dir->config.predicate.predicate_table[i]); 					
+				if((pred_dir->config.predicate.predicate_table[i]&j) == 0)
+					x = -1;
+				else
+					x = 1;
+				value[i] = (pred_dir->config.predicate.value_table[index][i]) * x; 					
 				outcome += value[i];
+
+				j = j<<1;
 			}
 			
+			if (outcome >=0)
+				prediction = 1;
+			else
+				prediction = 0;
 			/* get pointers to that predicate and its values */
-						                        
+			pred_dir->config.predicate.prediction = prediction;           
 			pred_dir->config.predicate.output = outcome;
 			p = &pred_dir->config.predicate.predicate_table[index];
 			
-//			int l1index, l2index;
-//
-//        /* traverse 2-level tables */
-//        l1index = (baddr >> MD_BR_SHIFT) & (pred_dir->config.predicate.predsize - 1);
-//        l2index = pred_dir->config.predicate.pred_shiftregs[l1index];
-//        if (pred_dir->config.predicate.predication)
-//	  {
-//#if 1
-//	    /* this L2 index computation is more "compatible" to McFarling's
-//	       verison of it, i.e., if the PC xor address component is only
-//	       part of the index, take the lower order address bits for the
-//	       other part of the index, rather than the higher order ones */
-//	    l2index = (((l2index ^ (baddr >> MD_BR_SHIFT))
-//			& ((1 << pred_dir->config.two.shift_width) - 1))
-//		       | ((baddr >> MD_BR_SHIFT)
-//			  << pred_dir->config.two.shift_width));
-//#else
-//	    l2index = l2index ^ (baddr >> MD_BR_SHIFT);
-//#endif
-//	  }
-//	else
-//	  {
-//	    l2index =
-//	      l2index
-//		| ((baddr >> MD_BR_SHIFT) << pred_dir->config.two.shift_width);
-//	  }
-//        l2index = l2index & (pred_dir->config.two.l2size - 1);
-//
-//        /* get a pointer to prediction state information */
-//        p = &pred_dir->config.two.l2table[l2index];
+		}
 	  break;
     case BPredTaken:
     case BPredNotTaken:
@@ -1084,33 +1065,54 @@ Predicate training and update									***** Nang Le & Brandon McMillian
 	  {
 				
 		int i;
-		signed int t, x[200];
-		int beta;
-		beta = 1.95 * (pred->dirpred.bimod->config.predicate.predshift_width) + 14;
+		signed int t, x[400], j;
+		int theta;
+		theta = 1.93 * (pred->dirpred.bimod->config.predicate.predshift_width) + 14;
 		int index = pred->dirpred.bimod->config.predicate.index;
 		int output = pred->dirpred.bimod->config.predicate.output;
+		int prediction = pred->dirpred.bimod->config.predicate.prediction;
+		int numberOutcome;
 		if (taken)
+		{
 			t = 1;
-			else
+			numberOutcome = 1;
+		}
+		else
+		{
 			t = -1;
+			numberOutcome = 0;
+		}
+
+		j = 1;
 
 		if (output < 0)
 		output = (-1)*output;
-		
-		if (output <= beta || (output < 0 && t > 0) || (output >= 0 && t < 0))
+		// checking whether correlation is positive or negative
+		if((taken != prediction) || (output < theta && output >= (-theta)))
+		{
+		if ((output < theta && output >= (-theta)) || (output < 0 && t > 0) || (output >= 0 && t < 0))
 		{
 			
 							
 			for (i=0; i < pred->dirpred.bimod->config.predicate.predshift_width; i++)
-			{
-				if (pred->dirpred.bimod->config.predicate.predicate_table[i] == 0)
-				x[i] = -1;
+			{// checking whether ith weight at index is within a value that is 8 bit long
+				if ((((pred->dirpred.bimod->config.predicate.predicate_table[i]&j) == 0) && (numberOutcome ==0)) || (((pred->dirpred.bimod->config.predicate.predicate_table[i]&j) != 0) && (numberOutcome ==1)))
+				{
+					x[i] = 1;
+				}
 				else
-				x[i] = 1;
+				{
+					x[i] = -1;
+				}
+				
 				if (t == x[i])
-				pred->dirpred.bimod->config.predicate.value_table[index][i]++;
+				{
+					pred->dirpred.bimod->config.predicate.value_table[index][i]++;
+				}
 				else
-				pred->dirpred.bimod->config.predicate.value_table[index][i]--;
+				{
+					pred->dirpred.bimod->config.predicate.value_table[index][i]--;
+				}
 				if (pred->dirpred.bimod->config.predicate.value_table[index][i] > 127)
 				pred->dirpred.bimod->config.predicate.value_table[index][i] = 127;
 				if (pred->dirpred.bimod->config.predicate.value_table[index][i] < -128)
@@ -1128,7 +1130,7 @@ Predicate training and update									***** Nang Le & Brandon McMillian
 		
 		}	
 	  }
-      
+	 }
       if (taken)
 	  {
 		if (*dir_update_ptr->pdir1 < 3)

@@ -125,7 +125,7 @@ Predicate predictor config --------------- Nang Le & Brandon McMillian
 /* Predicate predictor config (<l1size> <ll2size> <shift_width>) */
 static int predicate_nelt = 3;
 static int predicate_config[3] =
-  { /* predicate index size */128, /*No. of BHR bits */16, /* hist */30};
+  { /* predicate index size */512, /*No. of BHR bits */8, /* hist */30};
 
 
 /* 2-level predictor config (<l1size> <l2size> <hist_size> <xor>) */
@@ -144,7 +144,7 @@ static int ras_size = 8;
 /* BTB predictor config (<num_sets> <associativity>) */
 static int btb_nelt = 2;
 static int btb_config[2] =
-  { /* nsets */512, /* assoc */4 };
+  { /* nsets */4096, /* assoc */4 };
 
 /* instruction decode B/W (insts/cycle) */
 static int ruu_decode_width;
@@ -633,7 +633,7 @@ sim_reg_options(struct opt_odb_t *odb)
 	      /* print */TRUE, /* format */NULL);
 
   opt_reg_int(odb, "-fetch:mplat", "extra branch mis-prediction latency",
-	      &ruu_branch_penalty, /* default */3,
+	      &ruu_branch_penalty, /* default */10,
 	      /* print */TRUE, /* format */NULL);
 
   opt_reg_int(odb, "-fetch:speed",
@@ -792,7 +792,7 @@ sim_reg_options(struct opt_odb_t *odb)
 
   opt_reg_string(odb, "-cache:il1",
 		 "l1 inst cache config, i.e., {<config>|dl1|dl2|none}",
-		 &cache_il1_opt, "il1:512:32:1:l",
+		 &cache_il1_opt, "il1:512:32:2:l",
 		 /* print */TRUE, NULL);
 
   opt_reg_note(odb,

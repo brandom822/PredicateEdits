@@ -140,11 +140,11 @@ struct bpred_dir_t {
       int predsize;  /* number of entries in predicate table */
 	  int predbit;	/* number of bits per entry 2^4 = 16 bits*/
       int predshift_width; /* history table BHR shift regs */
-	//  int predication; /*boolean guard compared instruction */
+	  int prediction; /*boolean guard compared instruction */
 	  int output;	                   	/* to store outcome of each lookup and use in update */
 	//  int *pred_shiftregs;		/* level-1 history table */
-	  signed int value_table[500][500];	/* store element of values */	
-	  unsigned char *predicate_table;		/* predicate state table*/
+	  int value_table[500][500];	/* store element of values */	
+	  unsigned char predicate_table[500];		/* predicate state table*/
 	  int index;				/* the index value = (baddr>>2) % (size predsize)*/
     } predicate;
   } config;
